@@ -1,0 +1,316 @@
+
+source("scripts/nn/networks/resnet.dml") as resnet
+
+N = 32
+C_in = 3
+Hin = 224
+Win = 224
+
+X = matrix(1, rows=N, cols=C_in*Hin*Win)
+
+# load model params
+# pre-residual layers params
+W_conv1_data = read("scripts/resnet18_test/parameters/conv1.weight.csv", format="csv", sep=",")
+W_conv1 = matrix(W_conv1_data, rows=64, cols=3*7*7)
+W_bn1_data = read("scripts/resnet18_test/parameters/bn1.weight.csv", format="csv", sep=",")
+W_bn1 = matrix(W_bn1_data, rows=64, cols=1)
+b_bn1_data = read("scripts/resnet18_test/parameters/bn1.bias.csv", format="csv", sep=",")
+b_bn1 = matrix(b_bn1_data, rows=64, cols=1)
+
+mean_bn1 = matrix(1, rows=64, cols=1)
+var_bn1 = matrix(0, rows=64, cols=1)
+
+# layer 1
+# block 0
+C_in = 64; C_base = 64
+name = "scripts/resnet18_test/parameters/layer1.0.conv1.weight.csv"
+W_conv1_10 = matrix(read(name, format="csv", sep=","),
+                        rows=C_base, cols=C_in*3*3)
+name = "scripts/resnet18_test/parameters/layer1.0.bn1.weight.csv"
+W_bn1_10 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer1.0.bn1.bias.csv"
+b_bn1_10 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer1.0.conv2.weight.csv"
+W_conv2_10 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_base*3*3)
+name = "scripts/resnet18_test/parameters/layer1.0.bn2.weight.csv"
+W_bn2_10 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer1.0.bn2.bias.csv"
+b_bn2_10 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+params_l1_b0 = list(W_conv1_10, W_bn1_10, b_bn1_10, W_conv2_10, W_bn2_10, b_bn2_10)
+
+mean_bn1_10 = matrix(1, rows=C_base, cols=1)
+var_bn1_10 = matrix(0, rows=C_base, cols=1)
+mean_bn2_10 = matrix(1, rows=C_base, cols=1)
+var_bn2_10 = matrix(0, rows=C_base, cols=1)
+emas_l1_b0 = list(mean_bn1_10, var_bn1_10, mean_bn2_10, var_bn2_10)
+
+# block 1
+C_in = 64; C_base = 64
+name = "scripts/resnet18_test/parameters/layer1.1.conv1.weight.csv"
+W_conv1_11 = matrix(read(name, format="csv", sep=","),
+                        rows=C_base, cols=C_in*3*3)
+name = "scripts/resnet18_test/parameters/layer1.1.bn1.weight.csv"
+W_bn1_11 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer1.1.bn1.bias.csv"
+b_bn1_11 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer1.1.conv2.weight.csv"
+W_conv2_11 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_base*3*3)
+name = "scripts/resnet18_test/parameters/layer1.1.bn2.weight.csv"
+W_bn2_11 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer1.1.bn2.bias.csv"
+b_bn2_11 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+params_l1_b1 = list(W_conv1_11, W_bn1_11, b_bn1_11, W_conv2_11, W_bn2_11, b_bn2_11)
+
+mean_bn1_11 = matrix(1, rows=C_base, cols=1)
+var_bn1_11 = matrix(0, rows=C_base, cols=1)
+mean_bn2_11 = matrix(1, rows=C_base, cols=1)
+var_bn2_11 = matrix(0, rows=C_base, cols=1)
+emas_l1_b1 = list(mean_bn1_11, var_bn1_11, mean_bn2_11, var_bn2_11)
+
+params_l1 = list(params_l1_b0, params_l1_b1)
+ema_l1 = list(emas_l1_b0, emas_l1_b1)
+
+# layer 2
+# block 0
+C_in = 64; C_base = 128
+name = "scripts/resnet18_test/parameters/layer2.0.conv1.weight.csv"
+W_conv1_20 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_in*3*3)
+name = "scripts/resnet18_test/parameters/layer2.0.bn1.weight.csv"
+W_bn1_20 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer2.0.bn1.bias.csv"
+b_bn1_20 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer2.0.conv2.weight.csv"
+W_conv2_20 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_base*3*3)
+name = "scripts/resnet18_test/parameters/layer2.0.bn2.weight.csv"
+W_bn2_20 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer2.0.bn2.bias.csv"
+b_bn2_20 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer2.0.downsample.0.weight.csv"
+W_conv3_20 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_in)
+name = "scripts/resnet18_test/parameters/layer2.0.downsample.1.weight.csv"
+W_bn3_20 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer2.0.downsample.1.bias.csv"
+b_bn3_20 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+params_l2_b0 = list(W_conv1_20, W_bn1_20, b_bn1_20, W_conv2_20, W_bn2_20, b_bn2_20, W_conv3_20, W_bn3_20, b_bn3_20)
+
+mean_bn1_20 = matrix(1, rows=C_base, cols=1)
+var_bn1_20 = matrix(0, rows=C_base, cols=1)
+mean_bn2_20 = matrix(1, rows=C_base, cols=1)
+var_bn2_20 = matrix(0, rows=C_base, cols=1)
+mean_bn3_20 = matrix(1, rows=C_base, cols=1)
+var_bn3_20 = matrix(0, rows=C_base, cols=1)
+emas_l2_b0 = list(mean_bn1_20, var_bn1_20, mean_bn2_20, var_bn2_20, mean_bn3_20, var_bn3_20)
+
+# block 1
+C_in = 128; C_base = 128
+name = "scripts/resnet18_test/parameters/layer2.1.conv1.weight.csv"
+W_conv1_21 = matrix(read(name, format="csv", sep=","),
+                        rows=C_base, cols=C_in*3*3)
+name = "scripts/resnet18_test/parameters/layer2.1.bn1.weight.csv"
+W_bn1_21 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer2.1.bn1.bias.csv"
+b_bn1_21 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer2.1.conv2.weight.csv"
+W_conv2_21 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_base*3*3)
+name = "scripts/resnet18_test/parameters/layer2.1.bn2.weight.csv"
+W_bn2_21 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer2.1.bn2.bias.csv"
+b_bn2_21 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+params_l2_b1 = list(W_conv1_21, W_bn1_21, b_bn1_21, W_conv2_21, W_bn2_21, b_bn2_21)
+
+mean_bn1_21 = matrix(1, rows=C_base, cols=1)
+var_bn1_21 = matrix(0, rows=C_base, cols=1)
+mean_bn2_21 = matrix(1, rows=C_base, cols=1)
+var_bn2_21 = matrix(0, rows=C_base, cols=1)
+emas_l2_b1 = list(mean_bn1_21, var_bn1_21, mean_bn2_21, var_bn2_21)
+
+params_l2 = list(params_l2_b0, params_l2_b1)
+ema_l2 = list(emas_l2_b0, emas_l2_b1)
+
+# layer 3
+# block 0
+C_in = 128; C_base = 256
+name = "scripts/resnet18_test/parameters/layer3.0.conv1.weight.csv"
+W_conv1_30 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_in*3*3)
+name = "scripts/resnet18_test/parameters/layer3.0.bn1.weight.csv"
+W_bn1_30 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer3.0.bn1.bias.csv"
+b_bn1_30 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer3.0.conv2.weight.csv"
+W_conv2_30 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_base*3*3)
+name = "scripts/resnet18_test/parameters/layer3.0.bn2.weight.csv"
+W_bn2_30 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer3.0.bn2.bias.csv"
+b_bn2_30 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer3.0.downsample.0.weight.csv"
+W_conv3_30 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_in)
+name = "scripts/resnet18_test/parameters/layer3.0.downsample.1.weight.csv"
+W_bn3_30 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer3.0.downsample.1.bias.csv"
+b_bn3_30 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+params_l3_b0 = list(W_conv1_30, W_bn1_30, b_bn1_30, W_conv2_30, W_bn2_30, b_bn2_30, W_conv3_30, W_bn3_30, b_bn3_30)
+
+mean_bn1_30 = matrix(1, rows=C_base, cols=1)
+var_bn1_30 = matrix(0, rows=C_base, cols=1)
+mean_bn2_30 = matrix(1, rows=C_base, cols=1)
+var_bn2_30 = matrix(0, rows=C_base, cols=1)
+mean_bn3_30 = matrix(1, rows=C_base, cols=1)
+var_bn3_30 = matrix(0, rows=C_base, cols=1)
+emas_l3_b0 = list(mean_bn1_30, var_bn1_30, mean_bn2_30, var_bn2_30, mean_bn3_30, var_bn3_30)
+
+# block 1
+C_in = 256; C_base = 256
+name = "scripts/resnet18_test/parameters/layer3.1.conv1.weight.csv"
+W_conv1_31 = matrix(read(name, format="csv", sep=","),
+                        rows=C_base, cols=C_in*3*3)
+name = "scripts/resnet18_test/parameters/layer3.1.bn1.weight.csv"
+W_bn1_31 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer3.1.bn1.bias.csv"
+b_bn1_31 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer3.1.conv2.weight.csv"
+W_conv2_31 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_base*3*3)
+name = "scripts/resnet18_test/parameters/layer3.1.bn2.weight.csv"
+W_bn2_31 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer3.1.bn2.bias.csv"
+b_bn2_31 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+params_l3_b1 = list(W_conv1_31, W_bn1_31, b_bn1_31, W_conv2_31, W_bn2_31, b_bn2_31)
+
+mean_bn1_31 = matrix(1, rows=C_base, cols=1)
+var_bn1_31 = matrix(0, rows=C_base, cols=1)
+mean_bn2_31 = matrix(1, rows=C_base, cols=1)
+var_bn2_31 = matrix(0, rows=C_base, cols=1)
+emas_l3_b1 = list(mean_bn1_31, var_bn1_31, mean_bn2_31, var_bn2_31)
+
+params_l3 = list(params_l3_b0, params_l3_b1)
+ema_l3 = list(emas_l3_b0, emas_l3_b1)
+
+# layer 4
+# block 0
+C_in = 256; C_base = 512
+name = "scripts/resnet18_test/parameters/layer4.0.conv1.weight.csv"
+W_conv1_40 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_in*3*3)
+name = "scripts/resnet18_test/parameters/layer4.0.bn1.weight.csv"
+W_bn1_40 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer4.0.bn1.bias.csv"
+b_bn1_40 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer4.0.conv2.weight.csv"
+W_conv2_40 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_base*3*3)
+name = "scripts/resnet18_test/parameters/layer4.0.bn2.weight.csv"
+W_bn2_40 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer4.0.bn2.bias.csv"
+b_bn2_40 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer4.0.downsample.0.weight.csv"
+W_conv3_40 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_in)
+name = "scripts/resnet18_test/parameters/layer4.0.downsample.1.weight.csv"
+W_bn3_40 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer4.0.downsample.1.bias.csv"
+b_bn3_40 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+params_l4_b0 = list(W_conv1_40, W_bn1_40, b_bn1_40, W_conv2_40, W_bn2_40, b_bn2_40, W_conv3_40, W_bn3_40, b_bn3_40)
+
+mean_bn1_40 = matrix(1, rows=C_base, cols=1)
+var_bn1_40 = matrix(0, rows=C_base, cols=1)
+mean_bn2_40 = matrix(1, rows=C_base, cols=1)
+var_bn2_40 = matrix(0, rows=C_base, cols=1)
+mean_bn3_40 = matrix(1, rows=C_base, cols=1)
+var_bn3_40 = matrix(0, rows=C_base, cols=1)
+emas_l4_b0 = list(mean_bn1_40, var_bn1_40, mean_bn2_40, var_bn2_40, mean_bn3_40, var_bn3_40)
+
+# block 1
+C_in = 512; C_base = 512
+name = "scripts/resnet18_test/parameters/layer4.1.conv1.weight.csv"
+W_conv1_41 = matrix(read(name, format="csv", sep=","),
+                        rows=C_base, cols=C_in*3*3)
+name = "scripts/resnet18_test/parameters/layer4.1.bn1.weight.csv"
+W_bn1_41 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer4.1.bn1.bias.csv"
+b_bn1_41 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer4.1.conv2.weight.csv"
+W_conv2_41 = matrix(read(name, format="csv", sep=","),
+                       rows=C_base, cols=C_base*3*3)
+name = "scripts/resnet18_test/parameters/layer4.1.bn2.weight.csv"
+W_bn2_41 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+name = "scripts/resnet18_test/parameters/layer4.1.bn2.bias.csv"
+b_bn2_41 = matrix(read(name, format="csv", sep=","),
+                     rows=C_base, cols=1)
+params_l4_b1 = list(W_conv1_41, W_bn1_41, b_bn1_41, W_conv2_41, W_bn2_41, b_bn2_41)
+
+mean_bn1_41 = matrix(1, rows=C_base, cols=1)
+var_bn1_41 = matrix(0, rows=C_base, cols=1)
+mean_bn2_41 = matrix(1, rows=C_base, cols=1)
+var_bn2_41 = matrix(0, rows=C_base, cols=1)
+emas_l4_b1 = list(mean_bn1_41, var_bn1_41, mean_bn2_41, var_bn2_41)
+
+params_l4 = list(params_l4_b0, params_l4_b1)
+ema_l4 = list(emas_l4_b0, emas_l4_b1)
+
+# post res layer params
+name = "scripts/resnet18_test/parameters/fc.weight.csv"
+W_fc = matrix(read(name, format="csv", sep=","),
+              rows=1000, cols=C_base)
+W_fc = t(W_fc)
+name = "scripts/resnet18_test/parameters/fc.bias.csv"
+b_fc = matrix(read(name, format="csv", sep=","),
+              rows=1, cols=1000)
+
+model = list(W_conv1, W_bn1, b_bn1, params_l1, params_l2, params_l3, params_l4, W_fc, b_fc)
+emas = list(mean_bn1, var_bn1, ema_l1, ema_l2, ema_l3, ema_l4)
+mode = "train"
+
+print("Start")
+[out, emas_upd] = resnet::resnet18_forward(X, Hin, Win, model, mode, emas)
+print(nrow(out))
+print(ncol(out))
+print("End")
+print(toString(out))
+print(toString(out[1, 500:512]))
+

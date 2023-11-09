@@ -1,0 +1,49 @@
+source("nn/layers/graph_conv.dml") as gcl
+
+
+n = 2708
+m = 10556
+f_in1 = 1433
+f_in2 = 2000
+f_in3 = 5000
+f_out = 1433
+add_self_loops = TRUE
+
+data_x = read("gcl_project/data/x.csv", format="csv", sep=",")
+data_edge = read("gcl_project/data/edge_index.csv", format="csv", sep=",")
+features = matrix(data_x, rows=n, cols=f_in1)
+edge_index = t(matrix(data_edge, rows=2, cols=m)) + 1
+edge_weight = matrix(1, rows=m, cols=1)
+
+data_W1 = read("gcl_project/data/W1.csv", format="csv", sep=",")
+data_W2 = read("gcl_project/data/W2.csv", format="csv", sep=",")
+data_W3 = read("gcl_project/data/W3.csv", format="csv", sep=",")
+W1 = matrix(data_W1, rows=f_in1, cols=f_in2)
+W2 = matrix(data_W2, rows=f_in2, cols=f_in3)
+W3 = matrix(data_W3, rows=f_in3, cols=f_out)
+b1 = matrix(0, rows=1, cols=f_in2)
+b2 = matrix(0, rows=1, cols=f_in3)
+b3 = matrix(0, rows=1, cols=f_out)
+
+num_iterations = 100
+
+print("Start")
+
+for (i in 1:num_iterations)
+{
+    print(i)
+    features = gcl::forward(features, edge_index, edge_weight, W1, b1, add_self_loops)
+    features = gcl::forward(features, edge_index, edge_weight, W2, b2, add_self_loops)
+    features = gcl::forward(features, edge_index, edge_weight, W3, b3, add_self_loops)
+
+}
+/*
+for (i in 1:100)
+{
+    print(i)
+    features = features %*% W1 %*% W2 %*% W3
+}
+*/
+
+
+print("Done")
