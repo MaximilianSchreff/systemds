@@ -1,5 +1,5 @@
 
-source("scripts/nn/networks/resnet.dml") as resnet
+source("scripts/nn/networks/resnet18.dml") as resnet
 
 N = 32
 C_in = 3
@@ -307,7 +307,7 @@ emas = list(mean_bn1, var_bn1, ema_l1, ema_l2, ema_l3, ema_l4)
 mode = "train"
 
 print("Start")
-[out, emas_upd] = resnet::resnet18_forward(X, Hin, Win, model, mode, emas)
+[out, emas_upd] = resnet::forward(X, Hin, Win, model, mode, emas)
 print(nrow(out))
 print(ncol(out))
 print("End")
