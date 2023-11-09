@@ -1,0 +1,66 @@
+
+source("scripts/nn/networks/resnet.dml") as resnet
+
+# example dummy data
+# Example 1: Simple, no downsampling
+# i.e. Hin = Hout, Win = Wout
+strideh = 1; stridew = 1
+C_in = 4; C_base = 4
+Hin = 4; Win = 4
+N = 3
+X = matrix(0, rows=N, cols=C_in*Hin*Win)
+W_conv1 = matrix(1, rows=C_base, cols=C_in*3*3)
+gamma_bn1 = matrix(1, rows=C_base, cols=1)
+beta_bn1 = matrix(0, rows=C_base, cols=1)
+W_conv2 = matrix(0, rows=C_base, cols=C_base*3*3)
+gamma_bn2 = matrix(1, rows=C_base, cols=1)
+beta_bn2 = matrix(0, rows=C_base, cols=1)
+weights = list(W_conv1, gamma_bn1, beta_bn1, W_conv2, gamma_bn2, beta_bn2)
+mode = "train"
+
+ema_mean_bn1 = matrix(0, rows=C_base, cols=1)
+ema_var_bn1 = matrix(1, rows=C_base, cols=1)
+ema_mean_bn2 = matrix(0, rows=C_base, cols=1)
+ema_var_bn2 = matrix(1, rows=C_base, cols=1)
+ema_means_vars = list(ema_mean_bn1, ema_var_bn1, ema_mean_bn2, ema_var_bn2)
+
+print("Start")
+
+[out, Hout, Wout, ema_means_vars_up] = resnet::basic_block_forward(X, weights, C_in, C_base, Hin, Win,
+                                                            strideh, stridew, mode, ema_means_vars)
+print(ncol(out))
+print(ncol(X))
+
+print("All good")
+
+strideh = 1; stridew = 1
+C_in = 2; C_base = 4
+Hin = 4; Win = 4
+N = 3
+X = matrix(0, rows=N, cols=C_in*Hin*Win)
+W_conv1 = matrix(1, rows=C_base, cols=C_in*3*3)
+gamma_bn1 = matrix(1, rows=C_base, cols=1)
+beta_bn1 = matrix(0, rows=C_base, cols=1)
+W_conv2 = matrix(0, rows=C_base, cols=C_base*3*3)
+gamma_bn2 = matrix(1, rows=C_base, cols=1)
+beta_bn2 = matrix(0, rows=C_base, cols=1)
+# weights for downsampling
+W_conv3 = matrix(0, rows=C_base, cols=C_in)
+gamma_bn3 = matrix(1, rows=C_base, cols=1)
+beta_bn3 = matrix(0, rows=C_base, cols=1)
+weights = list(W_conv1, gamma_bn1, beta_bn1, W_conv2, gamma_bn2, beta_bn2,
+               W_conv3, gamma_bn3, beta_bn3)
+
+mode = "train"
+ema_mean_bn1 = matrix(0, rows=C_base, cols=1)
+ema_var_bn1 = matrix(1, rows=C_base, cols=1)
+ema_mean_bn2 = matrix(0, rows=C_base, cols=1)
+ema_var_bn2 = matrix(1, rows=C_base, cols=1)
+# params for downsampling
+ema_mean_bn3 = matrix(0, rows=C_base, cols=1)
+ema_var_bn3 = matrix(1, rows=C_base, cols=1)
+ema_means_vars = list(ema_mean_bn1, ema_var_bn1, ema_mean_bn2, ema_var_bn2,
+                      ema_mean_bn3, ema_var_bn3)
+
+[out, Hout, Wout, ema_means_vars_up] = resnet::basic_block_forward(X, weights, C_in, C_base, Hin, Win,
+                                                                strideh, stridew, mode, ema_means_vars)

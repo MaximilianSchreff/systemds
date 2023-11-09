@@ -1,0 +1,36 @@
+
+source("scripts/nn/networks/resnet.dml") as resnet
+
+# example dummy data
+# Example 1: Simple, no downsampling
+# i.e. Hin = Hout, Win = Wout
+strideh = 1; stridew = 1
+C_in = 2; C_base = 2
+Hin = 4; Win = 4
+N = 2
+X = matrix(1, rows=N, cols=C_in*Hin*Win)
+W_conv1 = matrix("-0.13904892  0.12838013  0.08027278 -0.06143695  0.07755502 -0.16483936  0.06582125  0.00754158  0.10763083 0.04604699  0.03576668 -0.07599333 -0.06836346  0.19890614  0.01955454 -0.02767003  0.21198983  0.12785362
+                   0.04019578 -0.14636862 -0.02285126 -0.00971214  0.12590824 -0.06414033 -0.1034085  -0.23452668 -0.0999288   0.12418596 -0.03290591  0.02420332 0.17950852  0.00047226  0.13068716 -0.00955899  0.03092374  0.05555834",
+                   rows=C_base, cols=C_in*3*3)
+gamma_bn1 = matrix(1, rows=C_base, cols=1)
+beta_bn1 = matrix(0, rows=C_base, cols=1)
+W_conv2 = matrix(" 0.10092591  0.15790914 -0.17673795  0.10573213  0.13680543 -0.22161855 -0.10239416  0.10747905  0.03636803 -0.00693908 -0.19976966 -0.15770042 -0.23468268  0.1040463   0.08357517 0.0780759   0.21764557 -0.11318331
+                   0.1958775   0.00366694  0.05713235 -0.0768708  -0.04275537 -0.23076743 -0.029018   -0.02308315 -0.05915356 -0.12383241  0.16292028  0.20669906 -0.19045494  0.10580237  0.21305619 0.19072767 -0.19292024  0.15425198",
+                 rows=C_base, cols=C_base*3*3)
+gamma_bn2 = matrix(1, rows=C_base, cols=1)
+beta_bn2 = matrix(0, rows=C_base, cols=1)
+weights = list(W_conv1, gamma_bn1, beta_bn1, W_conv2, gamma_bn2, beta_bn2)
+mode = "train"
+
+ema_mean_bn1 = matrix(0, rows=C_base, cols=1)
+ema_var_bn1 = matrix(0, rows=C_base, cols=1)
+ema_mean_bn2 = matrix(0, rows=C_base, cols=1)
+ema_var_bn2 = matrix(0, rows=C_base, cols=1)
+ema_means_vars = list(ema_mean_bn1, ema_var_bn1, ema_mean_bn2, ema_var_bn2)
+
+print("Start")
+
+[out, Hout, Wout, ema_means_vars_up] = resnet::basic_block_forward(X, weights, C_in, C_base, Hin, Win,
+                                                            strideh, stridew, mode, ema_means_vars)
+print(toString(out))
+
