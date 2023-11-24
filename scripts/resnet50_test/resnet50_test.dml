@@ -1,0 +1,30 @@
+
+source("scripts/nn/networks/resnet50.dml") as resnet
+
+N = 32
+C_in = 3
+Hin = 224
+Win = 224
+X = matrix(seq(1, N*C_in*Hin*Win), rows=N, cols=C_in*Hin*Win)
+
+C_base = 64
+W_conv1 = matrix(read("scripts/resnet50_test/parameters/conv1.weight.csv", format="csv", sep=","), rows=C_base, cols=C_in*7*7)
+#W_bn1 = matrix(read("scripts/resnet50_test/parameters/bn1.weight.csv", rows=C_base, cols=1, format="csv", sep=",")
+#b_bn1 = read("scripts/resnet50_test/parameters/bn1.bias.csv", rows=C_base, cols=1, format="csv", sep=",", data_type="matrix")
+mean_bn1 = matrix(1, rows=64, cols=1)
+var_bn1 = matrix(0, rows=64, cols=1)
+
+
+
+# l1_b0 = list(W_conv1_10, W_bn1_10, b_bn1_10, W_conv2_10, W_bn2_10, b_bn2_10, W_conv3_10, W_bn3_10, b_bn3_10, W_conv4_10, W_bn4_10, b_bn4_10)
+
+mean_bn1_10 = matrix(1, rows=C_base, cols=1)
+var_bn1_10 = matrix(0, rows=C_base, cols=1)
+mean_bn2_10 = matrix(1, rows=C_base, cols=1)
+var_bn2_10 = matrix(0, rows=C_base, cols=1)
+mean_bn3_10 = matrix(1, rows=4*C_base, cols=1)
+var_bn3_10 = matrix(0, rows=4*C_base, cols=1)
+mean_bn4_10 = matrix(1, rows=4*C_base, cols=1)
+var_bn4_10 = matrix(0, rows=4*C_base, cols=1)
+
+# emas_l1_b0 = list(mean_bn1_10, var_bn1_10, mean_bn2_10, var_bn2_10, mean_bn3_10, var_bn3_10, mean_bn4_10, var_bn4_10)

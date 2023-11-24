@@ -1,0 +1,11 @@
+
+
+X = rand(rows=1000, cols=1000)
+Y = rand(rows=1000, cols=1000)
+
+for (i in 1:100) {
+    print(i)
+    X = X %*% Y
+}
+
+print(toString(X))
