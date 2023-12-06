@@ -1,0 +1,23 @@
+A = rand(rows=100, cols=100)
+B = rand(rows=100, cols=100)
+C = A + B
+D = A + B
+
+CCC = list(B, C)
+DDD = list(D, D)
+
+E = some_function(CCC, 2)
+F = some_function(DDD, 3)
+
+print(toString(E))
+print(toString(F))
+
+some_function = function(list[unknown] l, integer n)
+    return (matrix[double] res) {
+    count = 0
+    for (i in 1:n) {
+        count += 1
+    }
+    X = as.matrix(l[1])
+    res = X + count
+}
